@@ -1,6 +1,7 @@
 package ci.nsu.moble.main
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -30,6 +31,11 @@ import androidx.compose.ui.unit.dp
 
 class MainActivity : ComponentActivity() {
 
+    // Тег для логирования
+    companion object {
+        private const val TAG = "ColorLab"
+    }
+
     private val colors = mapOf(
         "red" to Color.Red,
         "orange" to Color(0xFFFFA500),
@@ -42,7 +48,40 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent { ColorScreen(colors) }
+
+        // Логируем создание активности
+        Log.d(TAG, "onCreate: MainActivity создана")
+        Log.i(TAG, "Загружено ${colors.size} цветов")
+
+        setContent {
+            Log.d(TAG, "setContent: Запуск ColorScreen")
+            ColorScreen(colors)
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        Log.d(TAG, "onStart: MainActivity запущена")
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.d(TAG, "onResume: MainActivity возобновлена")
+    }
+
+    override fun onPause() {
+        super.onPause()
+        Log.d(TAG, "onPause: MainActivity приостановлена")
+    }
+
+    override fun onStop() {
+        super.onStop()
+        Log.d(TAG, "onStop: MainActivity остановлена")
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.d(TAG, "onDestroy: MainActivity уничтожена")
     }
 }
 
@@ -52,6 +91,9 @@ fun ColorScreen(colors: Map<String, Color>) {
     var buttonColor by remember { mutableStateOf(Color(0xFFACAFB0)) }
     val context = LocalContext.current
 
+    // Логируем при каждой рекомпозиции
+    Log.d("ColorLab", "ColorScreen рекомпозиция, текущий текст: '$text'")
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -59,7 +101,10 @@ fun ColorScreen(colors: Map<String, Color>) {
     ) {
         OutlinedTextField(
             value = text,
-            onValueChange = { text = it },
+            onValueChange = {
+                text = it
+                Log.d("ColorLab", "Текст изменен: '$it'")
+            },
             label = { Text("Введите цвет") },
             modifier = Modifier.fillMaxWidth()
         )
@@ -69,13 +114,18 @@ fun ColorScreen(colors: Map<String, Color>) {
         Button(
             onClick = {
                 // Приводим введенный текст к нижнему регистру для поиска
-                val color = colors[text.lowercase()]
+                val searchText = text.lowercase()
+                Log.d("ColorLab", "Поиск цвета: '$searchText'")
+
+                val color = colors[searchText]
 
                 if (color != null) {
                     buttonColor = color
                     Toast.makeText(context, "Цвет применен: $text", Toast.LENGTH_SHORT).show()
+                    Log.i("ColorLab", "Цвет '$text' найден и применен")
                 } else {
                     Toast.makeText(context, "Цвет \"$text\" не найден", Toast.LENGTH_LONG).show()
+                    Log.w("ColorLab", "Цвет '$text' не найден в списке доступных цветов")
                 }
             },
             modifier = Modifier
@@ -89,6 +139,7 @@ fun ColorScreen(colors: Map<String, Color>) {
         Spacer(modifier = Modifier.height(24.dp))
 
         // Вывод цветов в виде полосок
+        Log.d("ColorLab", "Отображение списка из ${colors.size} цветов")
         colors.forEach { (name, color) ->
             ColorStrip(name, color)
             Spacer(modifier = Modifier.height(8.dp))
@@ -98,6 +149,9 @@ fun ColorScreen(colors: Map<String, Color>) {
 
 @Composable
 fun ColorStrip(name: String, color: Color) {
+    // Логируем отрисовку каждой полоски
+    Log.d("ColorLab", "Отрисовка ColorStrip для цвета '$name'")
+
     Column(
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -113,7 +167,7 @@ fun ColorStrip(name: String, color: Color) {
 
         // Название цвета под полоской
         Text(
-            text = name.capitalize(),
+            text = name.replaceFirstChar { it.uppercase() },
             modifier = Modifier.padding(start = 4.dp)
         )
     }
