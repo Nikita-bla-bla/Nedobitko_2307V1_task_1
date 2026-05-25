@@ -40,7 +40,7 @@ fun TemperatureScreen(
             }
         )
 
-        // Поле Фаренгейта
+        // Поле Фаренгейта.
         TextField(
             value = uiState.fahrenheit,
             onValueChange = { viewModel.onFahrenheitChanged(it) },
